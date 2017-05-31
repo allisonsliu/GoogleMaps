@@ -15,6 +15,7 @@
             android:layout_height="wrap_content"
             android:text="Toggle View"
             android:id="@+id/button_toggle"
+            android:nestedScrollingEnabled="false"
             android:onClick="changeView" />
 
 </LinearLayout>

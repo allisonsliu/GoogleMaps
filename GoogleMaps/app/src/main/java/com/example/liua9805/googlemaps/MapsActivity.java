@@ -9,6 +9,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
         import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -25,9 +26,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private boolean isGPSEnabled = false;
     private boolean isNetworkEnabled = false;
     private boolean canGetLocation = false;
-    private static final long MIN_TIME_BW_UPDATES = 1000*15*1;
+    private static final long MIN_TIME_BW_UPDATES = 1000 * 15 * 1;
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 5;
-
 
 
     @Override
@@ -58,23 +58,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng birthPlace = new LatLng(42, -87);
         mMap.addMarker(new MarkerOptions().position(birthPlace).title("Born here"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(birthPlace));
-        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED){
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Log.d("GoogleMaps", "Failed Permission check 1");
             Log.d("GoogleMaps", Integer.toString(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)));
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 2);
         }
-        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Log.d("GoogleMaps", "Failed Permission check 2");
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 2);
         }
         mMap.setMyLocationEnabled(true);
     }
 
-    public void changeView(GoogleMap googleMap){
-        if(mMap.getMapType()!= googleMap.MAP_TYPE_SATELLITE) {
+    public void changeView(View view) {
+        if (mMap.getMapType() != GoogleMap.MAP_TYPE_SATELLITE) {
             mMap.setMapType(mMap.MAP_TYPE_SATELLITE);
-        }
-        else{
+        } else {
             mMap.setMapType(mMap.MAP_TYPE_NORMAL);
         }
     }
@@ -120,6 +119,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Log.d("MyMaps", "Caught exception in getLocation");
             e.printStackTrace();
         }
+    }
+
+    android.location.LocationListener locationListenerGps = new android.location.LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            //output is Log.d and Toast that GPS is enabled and working
+
+            //Drop a marker on map- create a method called dropMarker
+            //Remove the network location updates. See LocationManager for update removal method
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+            //output is Log.d and Toast that GPS is enabled and working
+
+            //setup a switch statemen to check the status input parameter
+
+
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+        }
     }*/
+
 
 }
