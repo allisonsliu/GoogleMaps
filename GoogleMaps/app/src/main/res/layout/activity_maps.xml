@@ -23,7 +23,8 @@
 
             android:text="Track"
             android:id="@+id/button_tracker"
-            android:onClick="getLocation" />
+            android:onClick="trackerEnabled"
+            android:nestedScrollingEnabled="true" />
 
 </LinearLayout>
 
