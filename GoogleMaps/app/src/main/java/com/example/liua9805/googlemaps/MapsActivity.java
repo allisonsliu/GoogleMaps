@@ -16,8 +16,12 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -40,6 +44,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Location myLocation;
     private static final int MY_LOC_ZOOM_FACTOR = 17;
     public boolean trackOn = false;
+    private EditText editSearch;
 
 
     @Override
@@ -50,6 +55,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        editSearch = (EditText) findViewById(R.id.editText_search);
     }
 
 
@@ -79,7 +86,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Log.d("GoogleMaps", "Failed Permission check 2");
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 2);
         }
-        mMap.setMyLocationEnabled(true);
+        //mMap.setMyLocationEnabled(true);
     }
 
     public void changeView(View view) {
@@ -91,9 +98,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     public void trackerEnabled(View view) {
-        if (trackOn = false) {
-            Log.d("MyMaps", "trackerEnabled:getLocation");
-            getLocation(view);
+
+        if (trackOn == false) {
+            Log.d("MyMaps", "trackerEnabled: Tracker on");
+            Toast.makeText(this, "trackerEnabled: Tracker On", Toast.LENGTH_SHORT).show();
+            getLocation();
+            trackOn = true;
         } else {
 
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -106,18 +116,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 // for ActivityCompat#requestPermissions for more details.
                 return;
             }
+
             locationManager.removeUpdates(locationListenerNetwork);
+            locationManager.removeUpdates(locationListenerGps);
+            Log.d("MyMaps", "trackerEnabled: Tracker off");
+            Toast.makeText(this, "trackerEnabled: Tracker Off", Toast.LENGTH_SHORT).show();
+            trackOn = false;
 
         }
     }
 
-    public void getLocation(View view) {
-        if(trackOn = false){
-            trackOn = true;
-        }
-        else{
-            trackOn = false;
-        }
+    public void getLocation() {
+
         try {
             locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
             isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
@@ -149,7 +159,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             locationListenerNetwork);
 
                     Log.d("MyMaps", "getLocation: NetworkLoc update request successful.");
-                    Toast.makeText(this, "Using Network", Toast.LENGTH_SHORT);
+                    Toast.makeText(this, "Using Network", Toast.LENGTH_SHORT).show();
                 }
                 if (isGPSEnabled) {
                     Log.d("MyMaps", "getLocation: GPS enabled - requesting location updates");
@@ -159,7 +169,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             locationListenerGps);
 
                     Log.d("MyMaps", "getLocation: GPS update request successful.");
-                    Toast.makeText(this, "Using GPS", Toast.LENGTH_SHORT);
+                    Toast.makeText(this, "Using GPS", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -203,12 +213,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 //case LocationProvider.AVAILABLE --> output message to Log.d and Toast
                 case LocationProvider.AVAILABLE:
                     Log.d("MyMaps", "onStatusChanged: Location Provider available");
-                    Toast.makeText(MapsActivity.this, "Location Provider available", Toast.LENGTH_SHORT);
+                    Toast.makeText(MapsActivity.this, "Location Provider available", Toast.LENGTH_SHORT).show();
                     break;
                 //case LocationProvider.OUT_OF_SERVICE --> output message and request updates from NETWORK_PROVIDER
                 case LocationProvider.OUT_OF_SERVICE:
                     Log.d("MyMaps", "onStatusChanged: Location Provider out of service");
-                    Toast.makeText(MapsActivity.this, "Location Provider out of service", Toast.LENGTH_SHORT);
+                    Toast.makeText(MapsActivity.this, "Location Provider out of service", Toast.LENGTH_SHORT).show();
                     if (ActivityCompat.checkSelfPermission(MapsActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MapsActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                         // TODO: Consider calling
                         //    ActivityCompat#requestPermissions
@@ -227,7 +237,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 //case LocationProvider.TEMPORARILY_UNAVAILABLE --> request updates from NETWORK_PROVIDER
                 case LocationProvider.TEMPORARILY_UNAVAILABLE:
                     Log.d("MyMaps", "onStatusChanged: Location Provider temporarily unavailable");
-                    Toast.makeText(MapsActivity.this, "Location Provider temporarily unavailable", Toast.LENGTH_SHORT);
+                    Toast.makeText(MapsActivity.this, "Location Provider temporarily unavailable", Toast.LENGTH_SHORT).show();
                     locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
                             MIN_TIME_BW_UPDATES,
                             MIN_DISTANCE_CHANGE_FOR_UPDATES,
@@ -258,7 +268,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onLocationChanged(Location location) {
                 //output is Log.d and Toast that GPS is enabled and working
                 Log.d("MyMaps", "onLocationChanged: GPS enabled and working");
-                Toast.makeText(MapsActivity.this, "GPS enabled and working", Toast.LENGTH_SHORT);
+                Toast.makeText(MapsActivity.this, "GPS enabled and working", Toast.LENGTH_SHORT).show();
 
                 //Drop a marker on map- create a method called dropMarker
                 dropMarker(LocationManager.NETWORK_PROVIDER);
@@ -285,7 +295,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onStatusChanged(String provider, int status, Bundle extras) {
                 //output is Log.d and Toast that GPS is enabled and working
                 Log.d("MyMaps", "onLocationChanged: GPS enabled and working");
-                Toast.makeText(MapsActivity.this, "GPS enabled and working", Toast.LENGTH_SHORT);
+                Toast.makeText(MapsActivity.this, "GPS enabled and working", Toast.LENGTH_SHORT).show();
 
             }
 
@@ -313,43 +323,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     // for ActivityCompat#requestPermissions for more details.
                     return;
                 }
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
+                        MIN_TIME_BW_UPDATES,
+                        MIN_DISTANCE_CHANGE_FOR_UPDATES,
+                        locationListenerNetwork);
                 myLocation = locationManager.getLastKnownLocation(provider);
 
         }
         if(myLocation == null){
             //display a message via Log.d and Toast
             Log.d("MyMaps", "dropMarker: myLocation is null");
-            Toast.makeText(MapsActivity.this, "myLocation is null", Toast.LENGTH_SHORT);
+            Toast.makeText(MapsActivity.this, "myLocation is null", Toast.LENGTH_SHORT).show();
         }else{
+            userLocation = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
+            //Display a message with the lat/lng
+            CameraUpdate update = CameraUpdateFactory.newLatLngZoom(userLocation, MY_LOC_ZOOM_FACTOR);
+            //Drop the actual marker on the map
+            //if using circles, references Android Circle class
             if(provider.equals(locationManager.GPS_PROVIDER)) {
-                userLocation = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
-                //Display a message with the lat/lng
-                CameraUpdate update = CameraUpdateFactory.newLatLngZoom(userLocation, MY_LOC_ZOOM_FACTOR);
-                //Drop the actual marker on the map
-                //if using circles, references Android Circle class
-                Circle gpsCircle = mMap.addCircle(new CircleOptions()
+                mMap.addCircle(new CircleOptions()
                         .center(userLocation)
                         .radius(1)
                         .strokeColor(Color.BLUE)
                         .strokeWidth(2)
                         .fillColor(Color.BLUE));
-                mMap.animateCamera(update);
             }
-            else if(provider.equals(locationManager.NETWORK_PROVIDER)){
-                userLocation = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
-                //Display a message with the lat/lng
-                CameraUpdate update = CameraUpdateFactory.newLatLngZoom(userLocation, MY_LOC_ZOOM_FACTOR);
-                //Drop the actual marker on the map
-                //if using circles, references Android Circle class
-                Circle networkCircle = mMap.addCircle(new CircleOptions()
+            else{
+                mMap.addCircle(new CircleOptions()
                         .center(userLocation)
                         .radius(1)
                         .strokeColor(Color.RED)
                         .strokeWidth(2)
                         .fillColor(Color.RED));
-                mMap.animateCamera(update);
-
             }
+            mMap.animateCamera(update);
 
         }
     }
@@ -358,6 +365,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.clear();
     }
 
+    public void searchMap(View view, String interest){
+        int PLACE_PICKER_REQUEST = 1;
+        interest = editSearch.getText().toString();
+        PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+        try {
+            startActivityForResult(builder.build(this), PLACE_PICKER_REQUEST);
+        } catch (GooglePlayServicesRepairableException e) {
+            e.printStackTrace();
+        } catch (GooglePlayServicesNotAvailableException e) {
+            e.printStackTrace();
+        }
+        if(editSearch.getText()== null){
+            Log.d("MyMaps", "noSearch");
+            Toast.makeText(this, "noSearch", Toast.LENGTH_SHORT).show();
+        }
+
+    }
 
 
 }

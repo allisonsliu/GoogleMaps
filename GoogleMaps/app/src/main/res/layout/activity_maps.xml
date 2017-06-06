@@ -44,4 +44,27 @@
     android:layout_width="374dp"
     android:layout_height="356dp"
     tools:context="com.example.liua9805.googlemaps.MapsActivity"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Search"
+            android:id="@+id/button_search"
+            android:nestedScrollingEnabled="true"
+            android:onClick="searchMap" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/editText_search"
+            android:layout_weight="1" />
+
+
+    </LinearLayout>
+
 </LinearLayout>
