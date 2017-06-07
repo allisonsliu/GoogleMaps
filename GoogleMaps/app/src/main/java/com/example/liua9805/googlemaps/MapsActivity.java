@@ -7,6 +7,8 @@ import android.content.DialogInterface;
 import android.annotation.TargetApi;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
@@ -22,6 +24,7 @@ import android.widget.Toast;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.ui.PlacePicker;
+
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -31,6 +34,9 @@ import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.io.IOException;
+import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -42,9 +48,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final long MIN_TIME_BW_UPDATES = 1000 * 15 * 1;
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 5;
     private Location myLocation;
+    private LatLng userLocation;
+    private LatLng coordinates;
     private static final int MY_LOC_ZOOM_FACTOR = 17;
     public boolean trackOn = false;
     private EditText editSearch;
+    private Geocoder geocoder;
+    private List<Address> pointsOfInterest;
 
 
     @Override
@@ -310,7 +320,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         };
 
         public void dropMarker(String provider) {
-            LatLng userLocation = null;
+
             if (locationManager != null) {
 
                 if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -362,23 +372,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     public void clearMarkers(View view){
+
         mMap.clear();
     }
 
-    public void searchMap(View view, String interest){
-        int PLACE_PICKER_REQUEST = 1;
+    public void searchMap(View view, String interest) throws IOException {
         interest = editSearch.getText().toString();
-        PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
-        try {
-            startActivityForResult(builder.build(this), PLACE_PICKER_REQUEST);
-        } catch (GooglePlayServicesRepairableException e) {
-            e.printStackTrace();
-        } catch (GooglePlayServicesNotAvailableException e) {
-            e.printStackTrace();
-        }
-        if(editSearch.getText()== null){
+        if (editSearch.getText() == null) {
             Log.d("MyMaps", "noSearch");
             Toast.makeText(this, "noSearch", Toast.LENGTH_SHORT).show();
+        }
+        else{
+            Log.d("MyMaps", "Looking up poi");
+            pointsOfInterest = geocoder.getFromLocationName(interest,1000,myLocation.getLatitude()-5/60,
+                    myLocation.getLongitude()-5/60,myLocation.getLatitude()+5/60, myLocation.getLongitude()+5/60);
+//for loop to iterate through the list of locations returned
+            for(int i = 0; i<pointsOfInterest.size(); i++){
+                coordinates = new LatLng(pointsOfInterest.get(i).getLatitude(),
+                        pointsOfInterest.get(i).getLongitude());
+                mMap.addCircle(new CircleOptions()
+                        .center(coordinates)
+                        .radius(1)
+                        .strokeColor(Color.GREEN)
+                        .strokeWidth(2)
+                        .fillColor(Color.GREEN));
+            }
         }
 
     }
