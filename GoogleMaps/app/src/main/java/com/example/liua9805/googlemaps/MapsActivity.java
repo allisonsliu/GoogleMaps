@@ -53,9 +53,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LatLng coordinates;
     private static final int MY_LOC_ZOOM_FACTOR = 17;
     public boolean trackOn = false;
+    private LatLng closest;
     private EditText editSearch;
     private Geocoder geocoder;
-    private List<Address> pointsOfInterest;
+    private List<android.location.Address> pointsOfInterest;
 
 
     @Override
@@ -378,7 +379,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.clear();
     }
 
-    public void searchMap(View view) throws IOException {
+    public void searchMap(View view) {
+        mMap.clear();
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -391,28 +393,41 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         locationManager.removeUpdates(locationListenerNetwork);
         locationManager.removeUpdates(locationListenerGps);
-        String interest = editSearch.getText().toString();
-        if (editSearch.getText().toString() == null) {
-            Log.d("MyMaps", "noSearch");
-            Toast.makeText(this, "noSearch", Toast.LENGTH_SHORT).show();
-        }
+
         geocoder = new Geocoder(MapsActivity.this, Locale.US);
-            if (geocoder.isPresent()) {
-                Log.d("MyMaps", "Looking up poi");
-                pointsOfInterest = geocoder.getFromLocationName(interest, 1000, myLocation.getLatitude() - 5 / 60,
-                        myLocation.getLongitude() - 5 / 60, myLocation.getLatitude() + 5 / 60, myLocation.getLongitude() + 5 / 60);
-                Log.d("MyMaps", "foundLocations");
+
+        if (editSearch.getText().toString() != null) {
+            if (myLocation != null) {
+                try {
+                    Log.d("MyMaps", "Looking up poi");
+                    pointsOfInterest = geocoder.getFromLocationName(editSearch.getText().toString(),1000, myLocation.getLatitude() - .0833,
+                            myLocation.getLongitude() -.0833, myLocation.getLatitude() + .0833, myLocation.getLongitude() + .0833);
+                    Log.d("MyMaps", "foundLocations");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if(pointsOfInterest.isEmpty()){
+                    Log.d("MyMaps", "Address List empty");
+                    Toast.makeText(this, "Address List empty", Toast.LENGTH_SHORT).show();
+                }
 //for loop to iterate through the list of locations returned
                 for (int i = 0; i < pointsOfInterest.size(); i++) {
+
                     Log.d("MyMaps", String.valueOf(pointsOfInterest));
                     coordinates = new LatLng(pointsOfInterest.get(i).getLatitude(),
                             pointsOfInterest.get(i).getLongitude());
-                    mMap.addMarker(new MarkerOptions().position(coordinates).title(interest));
+                    mMap.addMarker(new MarkerOptions().position(coordinates).title(editSearch.getText().toString()));
+                    mMap.animateCamera(CameraUpdateFactory.newLatLng(coordinates));
                 }
             }
 
         }
+        else{
+            return;
+        }
     }
+}
+
 
 
 
